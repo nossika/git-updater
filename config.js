@@ -1,5 +1,8 @@
 module.exports = {
-  projectPath: '',
+  basePath: '',
   branch: 'master',
-  key: 'example-key', // Your Git Webhook Secret
+  key: 'nossika', // Your Git Webhook Secret
+  cmd: {
+    'FE-guide': ['npm run build'],
+  },
 };
