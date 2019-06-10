@@ -1,5 +1,5 @@
 module.exports = {
   projectPath: '',
   branch: 'master',
-  key: 'example-key',
+  key: 'example-key', // Your Git Webhook Secret
 };
