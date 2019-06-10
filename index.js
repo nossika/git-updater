@@ -57,16 +57,22 @@ app.use(async ctx => {
     const cwd = path.resolve(__dirname, `..${ctx.request.URL.pathname}`);
     await exec(`cd ${path.resolve(__dirname, '..', config.basePath, projectName)}`, 'check path');
     data = await exec(`git pull origin ${config.branch}`, { cwd }, 'git pull');
-    data += '\n';
+
     if (config.cmd && config.cmd[projectName]) {
       let cmds = config.cmd[projectName];
       if (typeof cmds === 'string') {
         cmds = [cmds];
       }
-      for (let i = 0; i < cmds.length; i++) {
-        data += await exec(cmds[i], { cwd }, `exec ${cmds[i]}`);
-      }
+
+      // 耗时较长，返回请求时不再await cmd日志
+      setTimeout(() => {
+        for (let i = 0; i < cmds.length; i++) {
+          exec(cmds[i], { cwd }, `exec ${cmds[i]}`);
+        }
+      });
+ 
     }
+
   } catch (err) {
     switch (err.flag) {
       case 'check path':
