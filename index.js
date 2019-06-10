@@ -55,8 +55,8 @@ app.use(async ctx => {
     // 默认的相对路径为git-updater这个包所在的目录，可在config中的basePath修改
     const projectName = ctx.request.URL.pathname.replace(/^[\/\\]/g, '');
     const cwd = path.resolve(__dirname, `..${ctx.request.URL.pathname}`);
-    await exec(`cd ${path.resolve(__dirname, '..', config.basePath, projectName)}`, 'path');
-    data = await exec(`git pull origin ${config.branch}`, { cwd }, 'pull');
+    await exec(`cd ${path.resolve(__dirname, '..', config.basePath, projectName)}`, 'check path');
+    data = await exec(`git pull origin ${config.branch}`, { cwd }, 'git pull');
     data += '\n';
     if (config.cmd && config.cmd[projectName]) {
       let cmds = config.cmd[projectName];
@@ -64,26 +64,22 @@ app.use(async ctx => {
         cmds = [cmds];
       }
       for (let i = 0; i < cmds.length; i++) {
-        data += await exec(cmds, { cwd }, 'cmd');
+        data += await exec(cmds[i], { cwd }, `exec ${cmds[i]}`);
       }
     }
   } catch (err) {
     switch (err.flag) {
-      case 'path':
+      case 'check path':
         ctx.response.status = 403;
-        ctx.body = { msg: 'path error', err: err.info || err };
+        ctx.body = { msg: 'path wrong' };
         break;
-      case 'pull':
+      case 'git pull':
         ctx.response.status = 500;
-        ctx.body = { msg: 'pull fail', err: err.info || err };
-        break;
-      case 'cmd':
-        ctx.response.status = 500;
-        ctx.body = { msg: 'pull fail', err: err.info || err };
+        ctx.body = { msg: 'pull fail' };
         break;
       default:
         ctx.response.status = 500;
-        ctx.body = { msg: 'fail', err: err.info || err };
+        ctx.body = { msg: err.flag || 'fail', err: err.info || String(err) };
     }
     return;
   }
